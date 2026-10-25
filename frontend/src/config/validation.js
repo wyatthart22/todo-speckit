@@ -10,6 +10,17 @@ export const emailRules = [
   (value) => isValidEmail(value) || "Enter a valid email address.",
 ];
 
+export const usernameRules = [(value) => !!value?.trim() || "Username is required."];
+
+export const loginPasswordRules = [(value) => !!value?.trim() || "Password is required."];
+
+export const registerPasswordRules = [
+  (value) => !!value?.trim() || "Password is required.",
+  (value) => (value?.length ?? 0) >= 8 || "Password must be at least 8 characters.",
+];
+
+export const requiredNameRules = (label) => [(value) => !!value?.trim() || `${label} is required.`];
+
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export function isValidDueDate(value) {
