@@ -26,3 +26,9 @@ export async function authenticate(req, res, next) {
 
   return next();
 }
+
+export async function getAccessibleListOrNull(req, listId) {
+  return db.list.findOne({
+    where: { id: listId, userId: req.user.id },
+  });
+}

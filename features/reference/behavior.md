@@ -26,10 +26,24 @@
 | Registration email: required + `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`; invalid format **"Enter a valid email address."** | `emailRules` in `frontend/src/config/validation.js` | Feature 1 |
 | Password minimum **8 characters** | Client rules + register controller | Feature 1 |
 
+## Lists and ownership
+
+| Rule | Enforcement | Introduced |
+|------|-------------|------------|
+| Every list belongs to exactly one user for its lifetime | `lists.userId` set from `req.user.id` only | Feature 2; ADR-0002 |
+| Reads/updates/deletes scoped with `userId: req.user.id` | `getAccessibleListOrNull` + `findAll` where | Feature 2 |
+| Cross-user list access → **`404`**, never `403` | List controller | Feature 2; ADR-0002 |
+| List names trimmed; empty/whitespace rejected | Client `listNameRules` + list controller | Feature 2 |
+| List name max **100** characters | List controller | Feature 2 |
+| Lists returned **alphabetically by name** | `findAll` `order: name ASC` | Feature 2 |
+
 ## UI
 
 | Rule | Enforcement | Introduced |
 |------|-------------|------------|
-| Login, register, and home placeholder use a full-screen layout (**no MenuBar**) | `App.vue` | Feature 1 |
-| Home placeholder welcomes the user by **first name** and has a **Sign out** button | `Home.vue` | Feature 1 |
+| Login and register use a full-screen layout (**no MenuBar**) | `App.vue` | Feature 1 |
 | Auth errors shown in `<v-alert type="error">` | Login / Register views | Feature 1 |
+| Signed-in **MenuBar** shows the user's name and **Sign out** | `MenuBar.vue` | Feature 2 |
+| Dashboard heading **My Lists**; primary action **+ New List** | `Dashboard.vue` | Feature 2 |
+| Empty lists copy: **"No lists yet. Create your first list."** | `Dashboard.vue` | Feature 2 |
+| Row icon actions: **Edit list**, **Delete list** (`size="small"`) | `Dashboard.vue` | Feature 2 |

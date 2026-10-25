@@ -21,6 +21,8 @@ export const registerPasswordRules = [
 
 export const requiredNameRules = (label) => [(value) => !!value?.trim() || `${label} is required.`];
 
+export const listNameRules = [(value) => !!value?.trim() || "List name is required."];
+
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export function isValidDueDate(value) {

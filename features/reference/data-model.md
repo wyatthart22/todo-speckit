@@ -1,6 +1,6 @@
 # Data Model Reference
 
-**Status:** Feature 1 identity and session tables.
+**Status:** Features 1–2.
 
 ## Tables
 
@@ -28,7 +28,19 @@ Password is excluded from the Sequelize default scope.
 | `expirationDate` | DATE | Required; 24 hours from session creation |
 | `userId` | INTEGER FK | Required, references `users.id` |
 
+### `lists`
+
+| Field | Type | Rules |
+|-------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `name` | STRING(100) | Required; trimmed; max 100 characters |
+| `userId` | INTEGER FK | Required; references `users.id`; set from `req.user.id` on create |
+| `createdAt` | DATE | Sequelize timestamps |
+| `updatedAt` | DATE | Sequelize timestamps |
+
 ## Associations
 
 - User `hasMany` Session (`as: "sessions"`, `foreignKey: "userId"`)
 - Session `belongsTo` User (`as: "user"`, `foreignKey: "userId"`)
+- User `hasMany` List (`as: "lists"`, `foreignKey: "userId"`)
+- List `belongsTo` User (`as: "user"`, `foreignKey: "userId"`)

@@ -30,4 +30,4 @@ They do **not** authorize new scope — implement only from `features/feature-*.
 | Area | Introduced |
 |------|------------|
 | Auth, sessions, protected route guard | Feature 1 |
-| `GET /todo/lists` (empty collection stub) | Feature 1 |
+| Lists CRUD + dashboard lists view + MenuBar | Feature 2 |

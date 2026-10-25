@@ -32,3 +32,11 @@ export const loginUser = async (overrides = {}) => {
   const res = await request(app).post("/todo/login").send(body);
   return { res, body };
 };
+
+export const bearer = (token) => ({ Authorization: `Bearer ${token}` });
+
+export const createList = async (token, body = {}) => {
+  const payload = { name: "Groceries", ...body };
+  const res = await request(app).post("/todo/lists").set(bearer(token)).send(payload);
+  return { res, body: payload };
+};
