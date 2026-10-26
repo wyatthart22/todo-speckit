@@ -1,6 +1,6 @@
 # Data Model Reference
 
-**Status:** Features 1–3.
+**Status:** Features 1–4.
 
 ## Tables
 
@@ -16,7 +16,7 @@
 | `password` | STRING(255) | Required; bcrypt hash only (`SALT_ROUNDS = 10`) |
 | `role` | STRING(20) | Default `worker` |
 
-Password is excluded from the Sequelize default scope.
+Password is excluded from the Sequelize default scope. `fName`, `lName`, `email`, and `username` are editable via `PUT /todo/users/:id`; `password` is optional on that update (hashed when provided); `role` is read-only.
 
 ### `sessions`
 

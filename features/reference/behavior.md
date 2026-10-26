@@ -50,13 +50,23 @@
 | Todos ordered **incomplete first**, then `createdAt` ascending | `findAll` order | Feature 3 |
 | Deleting a list **cascades** its todos | Sequelize `onDelete: CASCADE` | Feature 3 |
 
+## Profile
+
+| Rule | Enforcement | Introduced |
+|------|-------------|------------|
+| A user may read/update **only their own** profile (`:id` = `req.user.id`) | `getAccessibleUserOrNull` | Feature 4 |
+| Cross-user profile access → **`404`**, never `403` | User controller | Feature 4; ADR-0002 |
+| Profile strings trimmed; username `trim().toLowerCase()` | User update | Feature 4 |
+| Password optional on update; min **8** chars and bcrypt when provided | User update | Feature 4 |
+| After save, `localStorage` `user` is refreshed and `user-logged-in` is dispatched | `MenuBar.vue` | Feature 4 |
+
 ## UI
 
 | Rule | Enforcement | Introduced |
 |------|-------------|------------|
 | Login and register use a full-screen layout (**no MenuBar**) | `App.vue` | Feature 1 |
 | Auth errors shown in `<v-alert type="error">` | Login / Register views | Feature 1 |
-| Signed-in **MenuBar** shows the user's name and **Sign out** | `MenuBar.vue` | Feature 2 |
+| Signed-in **MenuBar** uses a profile icon dropdown; **Log out** lives there (no standalone **Sign out**) | `MenuBar.vue` | Feature 4 |
 | Dashboard heading **My Lists**; primary action **+ New List** | `Dashboard.vue` | Feature 2 |
 | Empty lists copy: **"No lists yet. Create your first list."** | `Dashboard.vue` | Feature 2 |
 | Row icon actions: **Edit list**, **Delete list** (`size="small"`) | `Dashboard.vue` | Feature 2 |

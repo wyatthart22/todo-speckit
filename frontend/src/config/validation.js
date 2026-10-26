@@ -19,6 +19,10 @@ export const registerPasswordRules = [
   (value) => (value?.length ?? 0) >= 8 || "Password must be at least 8 characters.",
 ];
 
+export const optionalPasswordRules = [
+  (value) => !value || value.length >= 8 || "Password must be at least 8 characters.",
+];
+
 export const requiredNameRules = (label) => [(value) => !!value?.trim() || `${label} is required.`];
 
 export const listNameRules = [(value) => !!value?.trim() || "List name is required."];
