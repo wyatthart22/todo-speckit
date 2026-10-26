@@ -23,6 +23,8 @@ export const requiredNameRules = (label) => [(value) => !!value?.trim() || `${la
 
 export const listNameRules = [(value) => !!value?.trim() || "List name is required."];
 
+export const todoTitleRules = [(value) => !!value?.trim() || "Todo title is required."];
+
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 export function isValidDueDate(value) {

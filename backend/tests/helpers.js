@@ -40,3 +40,12 @@ export const createList = async (token, body = {}) => {
   const res = await request(app).post("/todo/lists").set(bearer(token)).send(payload);
   return { res, body: payload };
 };
+
+export const createTodo = async (token, listId, body = {}) => {
+  const payload = { title: "Buy milk", ...body };
+  const res = await request(app)
+    .post(`/todo/lists/${listId}/todos`)
+    .set(bearer(token))
+    .send(payload);
+  return { res, body: payload };
+};

@@ -1,6 +1,6 @@
 # Data Model Reference
 
-**Status:** Features 1–2.
+**Status:** Features 1–3.
 
 ## Tables
 
@@ -38,9 +38,25 @@ Password is excluded from the Sequelize default scope.
 | `createdAt` | DATE | Sequelize timestamps |
 | `updatedAt` | DATE | Sequelize timestamps |
 
+### `todos`
+
+| Field | Type | Rules |
+|-------|------|-------|
+| `id` | INTEGER PK | Auto-increment |
+| `listId` | INTEGER FK | Required; references `lists.id`; cascade on list delete |
+| `title` | STRING(255) | Required; trimmed; max 255 characters |
+| `completed` | BOOLEAN | Default `false` |
+| `userId` | INTEGER FK | Required; references `users.id`; set from `req.user.id` on create |
+| `createdAt` | DATE | Sequelize timestamps |
+| `updatedAt` | DATE | Sequelize timestamps |
+
 ## Associations
 
 - User `hasMany` Session (`as: "sessions"`, `foreignKey: "userId"`)
 - Session `belongsTo` User (`as: "user"`, `foreignKey: "userId"`)
 - User `hasMany` List (`as: "lists"`, `foreignKey: "userId"`)
 - List `belongsTo` User (`as: "user"`, `foreignKey: "userId"`)
+- User `hasMany` Todo (`as: "todos"`, `foreignKey: "userId"`)
+- Todo `belongsTo` User (`as: "user"`, `foreignKey: "userId"`)
+- List `hasMany` Todo (`as: "todos"`, `foreignKey: "listId"`, `onDelete: CASCADE`)
+- Todo `belongsTo` List (`as: "list"`, `foreignKey: "listId"`)

@@ -37,6 +37,19 @@
 | List name max **100** characters | List controller | Feature 2 |
 | Lists returned **alphabetically by name** | `findAll` `order: name ASC` | Feature 2 |
 
+## Todos and ownership
+
+| Rule | Enforcement | Introduced |
+|------|-------------|------------|
+| A todo belongs to exactly one list and one user | `todos.listId` + `todos.userId` from server context | Feature 3 |
+| Parent list must be owned before create/read | `getAccessibleListOrNull` | Feature 3 |
+| Todo reads/updates/deletes scoped by `userId: req.user.id` | `getAccessibleTodoOrNull` | Feature 3 |
+| Cross-user todo or parent list → **`404`**, never `403` | Todo controller | Feature 3; ADR-0002 |
+| Titles trimmed; empty/whitespace rejected | Client `todoTitleRules` + todo controller | Feature 3 |
+| New todos default **`completed: false`** | Todo create | Feature 3 |
+| Todos ordered **incomplete first**, then `createdAt` ascending | `findAll` order | Feature 3 |
+| Deleting a list **cascades** its todos | Sequelize `onDelete: CASCADE` | Feature 3 |
+
 ## UI
 
 | Rule | Enforcement | Introduced |
@@ -47,3 +60,7 @@
 | Dashboard heading **My Lists**; primary action **+ New List** | `Dashboard.vue` | Feature 2 |
 | Empty lists copy: **"No lists yet. Create your first list."** | `Dashboard.vue` | Feature 2 |
 | Row icon actions: **Edit list**, **Delete list** (`size="small"`) | `Dashboard.vue` | Feature 2 |
+| List row **Items** icon opens a list-items dialog | `Dashboard.vue` | Feature 3 |
+| Empty todos copy: **"No todos in this list yet."** | Items dialog | Feature 3 |
+| Completed todos are struck-through / muted | Items dialog | Feature 3 |
+| **+ Add Item** is only inside the items dialog | `Dashboard.vue` | Feature 3 |

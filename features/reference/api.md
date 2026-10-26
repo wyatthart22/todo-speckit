@@ -1,6 +1,6 @@
 # API Reference
 
-**Status:** Features 1–2.
+**Status:** Features 1–3.
 
 API mount path: `/todo` (see `backend/server.js`). Authenticated routes require `Authorization: Bearer <token>`.
 
@@ -16,6 +16,10 @@ API mount path: `/todo` (see `backend/server.js`). Authenticated routes require 
 | `POST` | `/todo/lists` | Yes | Create a list owned by the authenticated user |
 | `PUT` | `/todo/lists/:listId` | Yes | Rename an owned list |
 | `DELETE` | `/todo/lists/:listId` | Yes | Delete an owned list |
+| `GET` | `/todo/lists/:listId/todos` | Yes | Fetch todos in an owned list |
+| `POST` | `/todo/lists/:listId/todos` | Yes | Add a todo to an owned list |
+| `PUT` | `/todo/todos/:id` | Yes | Update an owned todo (`title` and/or `completed`) |
+| `DELETE` | `/todo/todos/:id` | Yes | Delete an owned todo |
 
 ### Auth success body (`POST /todo/register` `201`, `POST /todo/login` `200`)
 
@@ -68,6 +72,34 @@ Create request: `{ "name": "Groceries" }`. Client-supplied `userId` is ignored.
 | Name longer than 100 characters | `400` | `{ "message": "List name must be 100 characters or fewer." }` |
 | Invalid `listId` | `400` | `{ "message": "List id is invalid." }` |
 | Missing, unowned, or unknown list | `404` | `{ "message": "List with id=<id> not found." }` |
+
+### Todo body (`POST .../todos` `201`, `PUT /todo/todos/:id` `200`)
+
+Create request: `{ "title": "Buy milk" }`. Client-supplied `userId` / `listId` is ignored.
+
+```json
+{
+  "id": 10,
+  "listId": 1,
+  "title": "Buy milk",
+  "completed": false,
+  "userId": 42,
+  "createdAt": "2026-07-02T12:05:00.000Z",
+  "updatedAt": "2026-07-02T12:05:00.000Z"
+}
+```
+
+`GET /todo/lists/:listId/todos` returns an array of that shape, incomplete first, then `createdAt` ascending.
+
+### Todo errors
+
+| Case | Status | Body |
+|------|--------|------|
+| Empty/whitespace title | `400` | `{ "message": "Todo title is required." }` |
+| Title longer than 255 characters | `400` | `{ "message": "Todo title must be 255 characters or fewer." }` |
+| Invalid `listId` / todo `id` | `400` | `{ "message": "List id is invalid." }` / `{ "message": "Todo id is invalid." }` |
+| Missing, unowned, or unknown list | `404` | `{ "message": "List with id=<id> not found." }` |
+| Missing, unowned, or unknown todo | `404` | `{ "message": "Todo with id=<id> not found." }` |
 
 ## Conventions
 
