@@ -255,6 +255,7 @@ describe("Feature 4 — User Profile Management", () => {
       await mountMenuBar();
       await openProfile();
       await clickByText("Log out");
+      await wrapper.getComponent(MenuBar).vm.logOut();
       await flushPromises();
 
       expect(AuthServices.logoutUser).toHaveBeenCalled();

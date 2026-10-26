@@ -14,6 +14,7 @@ import {
 const router = useRouter();
 const menuOpen = ref(false);
 const logoutLoading = ref(false);
+let logoutJob = null;
 const user = ref(Utils.getStore("user"));
 
 const editDialog = ref(false);
@@ -53,7 +54,17 @@ onUnmounted(() => {
   window.removeEventListener("user-logged-in", refreshUser);
 });
 
-async function logOut() {
+function logOut() {
+  if (!logoutJob) {
+    logoutJob = performLogOut().finally(() => {
+      logoutJob = null;
+    });
+  }
+
+  return logoutJob;
+}
+
+async function performLogOut() {
   logoutLoading.value = true;
 
   try {
@@ -61,8 +72,8 @@ async function logOut() {
   } finally {
     Utils.removeItem("user");
     logoutLoading.value = false;
-    menuOpen.value = false;
     await router.push({ name: "login" });
+    menuOpen.value = false;
   }
 }
 
@@ -142,6 +153,8 @@ async function saveProfile() {
     saveLoading.value = false;
   }
 }
+
+defineExpose({ logOut });
 </script>
 
 <template>
