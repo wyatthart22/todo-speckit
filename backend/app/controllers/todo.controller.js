@@ -21,6 +21,32 @@ const validateTitle = (rawTitle) => {
   return { title };
 };
 
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const INVALID_DUE_DATE = "Due date must be a valid date in YYYY-MM-DD format.";
+
+const parseDueDate = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return { dueDate: null };
+  }
+
+  if (typeof value !== "string" || !DATE_ONLY_REGEX.test(value)) {
+    return { error: INVALID_DUE_DATE };
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return { error: INVALID_DUE_DATE };
+  }
+
+  return { dueDate: value };
+};
+
 const notFoundList = (listId) => ({ message: `List with id=${listId} not found.` });
 const notFoundTodo = (todoId) => ({ message: `Todo with id=${todoId} not found.` });
 
@@ -66,6 +92,18 @@ exports.createForList = async (req, res) => {
     return res.status(400).send({ message: error });
   }
 
+  let dueDate = null;
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "dueDate")) {
+    const parsed = parseDueDate(req.body.dueDate);
+
+    if (parsed.error) {
+      return res.status(400).send({ message: parsed.error });
+    }
+
+    dueDate = parsed.dueDate;
+  }
+
   try {
     const list = await getAccessibleListOrNull(req, listId);
 
@@ -76,6 +114,7 @@ exports.createForList = async (req, res) => {
     const todo = await Todo.create({
       title,
       completed: false,
+      dueDate,
       listId: list.id,
       userId: req.user.id,
     });
@@ -110,8 +149,18 @@ exports.update = async (req, res) => {
     updates.completed = Boolean(req.body.completed);
   }
 
+  if (Object.prototype.hasOwnProperty.call(req.body, "dueDate")) {
+    const parsed = parseDueDate(req.body.dueDate);
+
+    if (parsed.error) {
+      return res.status(400).send({ message: parsed.error });
+    }
+
+    updates.dueDate = parsed.dueDate;
+  }
+
   if (Object.keys(updates).length === 0) {
-    return res.status(400).send({ message: "Title or completed is required." });
+    return res.status(400).send({ message: "Title, completed, or dueDate is required." });
   }
 
   try {

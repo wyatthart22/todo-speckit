@@ -2,7 +2,14 @@
 import { onMounted, ref } from "vue";
 import ListServices from "../services/listServices.js";
 import TodoServices from "../services/todoServices.js";
-import { listNameRules, todoTitleRules } from "../config/validation.js";
+import {
+  formatDueDate,
+  isTodoOverdue,
+  listNameRules,
+  optionalDueDateRules,
+  toDateInputValue,
+  todoTitleRules,
+} from "../config/validation.js";
 
 const lists = ref([]);
 const loading = ref(false);
@@ -32,12 +39,14 @@ const itemsError = ref("");
 const addItemDialog = ref(false);
 const addItemForm = ref(null);
 const newTodoTitle = ref("");
+const newTodoDueDate = ref("");
 const addItemLoading = ref(false);
 
 const editItemDialog = ref(false);
 const editItemForm = ref(null);
 const editingTodo = ref(null);
 const editTodoTitle = ref("");
+const editTodoDueDate = ref("");
 const editItemLoading = ref(false);
 
 const deleteItemDialog = ref(false);
@@ -169,6 +178,7 @@ function closeItems() {
 
 function openAddItem() {
   newTodoTitle.value = "";
+  newTodoDueDate.value = "";
   addItemForm.value?.resetValidation?.();
   addItemDialog.value = true;
 }
@@ -184,7 +194,13 @@ async function createTodo() {
   itemsError.value = "";
 
   try {
-    await TodoServices.createTodo(itemsList.value.id, { title: newTodoTitle.value });
+    const payload = { title: newTodoTitle.value };
+
+    if (newTodoDueDate.value) {
+      payload.dueDate = newTodoDueDate.value;
+    }
+
+    await TodoServices.createTodo(itemsList.value.id, payload);
     addItemDialog.value = false;
     await loadTodos();
   } catch (err) {
@@ -208,6 +224,7 @@ async function toggleTodo(todo, completed) {
 function openEditItem(todo) {
   editingTodo.value = todo;
   editTodoTitle.value = todo.title;
+  editTodoDueDate.value = toDateInputValue(todo.dueDate);
   editItemForm.value?.resetValidation?.();
   editItemDialog.value = true;
 }
@@ -223,7 +240,10 @@ async function saveTodo() {
   itemsError.value = "";
 
   try {
-    await TodoServices.updateTodo(editingTodo.value.id, { title: editTodoTitle.value });
+    await TodoServices.updateTodo(editingTodo.value.id, {
+      title: editTodoTitle.value,
+      dueDate: editTodoDueDate.value ? editTodoDueDate.value : null,
+    });
     editItemDialog.value = false;
     await loadTodos();
   } catch (err) {
@@ -382,6 +402,13 @@ async function confirmDeleteItem() {
               <v-list-item-title :class="todo.completed ? 'text-decoration-line-through text-medium-emphasis' : ''">
                 {{ todo.title }}
               </v-list-item-title>
+              <v-list-item-subtitle
+                v-if="todo.dueDate"
+                class="todo-due-date"
+                :class="{ 'todo-overdue text-error': isTodoOverdue(todo) }"
+              >
+                {{ formatDueDate(todo.dueDate) }}
+              </v-list-item-subtitle>
               <template #append>
                 <v-btn icon size="small" aria-label="Edit todo" @click.stop="openEditItem(todo)">
                   <v-icon>mdi-pencil</v-icon>
@@ -408,6 +435,12 @@ async function confirmDeleteItem() {
         <v-card-text>
           <v-form ref="addItemForm" @submit.prevent="createTodo">
             <v-text-field v-model="newTodoTitle" label="Todo title" :rules="todoTitleRules" />
+            <v-text-field
+              v-model="newTodoDueDate"
+              label="Due date"
+              type="date"
+              :rules="optionalDueDateRules"
+            />
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -428,6 +461,12 @@ async function confirmDeleteItem() {
         <v-card-text>
           <v-form ref="editItemForm" @submit.prevent="saveTodo">
             <v-text-field v-model="editTodoTitle" label="Todo title" :rules="todoTitleRules" />
+            <v-text-field
+              v-model="editTodoDueDate"
+              label="Due date"
+              type="date"
+              :rules="optionalDueDateRules"
+            />
           </v-form>
         </v-card-text>
         <v-card-actions>

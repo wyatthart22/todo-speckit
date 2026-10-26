@@ -1,6 +1,8 @@
 /**
  * Feature 3 — Todo List Item Management
  * Spec: features/feature-3-todo-list-item-management.md
+ * Feature 5 — Todo Due Date
+ * Spec: features/feature-5-todo-due-date.md
  */
 import request from "supertest";
 import app from "../server.js";
@@ -214,6 +216,125 @@ describe("Feature 3 — Todo List Item Management", () => {
         .set(bearer(userA.body.token));
 
       expect(todosRes.status).toBe(404);
+    });
+  });
+});
+
+describe("Feature 5 — Todo Due Date", () => {
+  let userA;
+  let userB;
+
+  beforeEach(async () => {
+    await syncTestDatabase();
+    ({ res: userA } = await registerUser());
+    ({ res: userB } = await registerUser({
+      username: "jsmith",
+      email: "jsmith@example.com",
+      fName: "John",
+      lName: "Smith",
+    }));
+  });
+
+  describe("US-5.1 — Set a due date when creating a todo", () => {
+    it("User adds a todo with a due date", async () => {
+      const { res: list } = await createList(userA.body.token);
+      const { res } = await createTodo(userA.body.token, list.body.id, {
+        title: "Buy milk",
+        dueDate: "2026-07-15",
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.body.dueDate).toBe("2026-07-15");
+    });
+
+    it("User adds a todo without a due date", async () => {
+      const { res: list } = await createList(userA.body.token);
+      const { res } = await createTodo(userA.body.token, list.body.id, { title: "Buy milk" });
+
+      expect(res.status).toBe(201);
+      expect(res.body.dueDate).toBeNull();
+    });
+
+    it("API rejects an invalid due date on create", async () => {
+      const { res: list } = await createList(userA.body.token);
+      const { res } = await createTodo(userA.body.token, list.body.id, {
+        title: "Task",
+        dueDate: "not-a-date",
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({
+        message: "Due date must be a valid date in YYYY-MM-DD format.",
+      });
+      expect(await db.todo.count()).toBe(0);
+    });
+  });
+
+  describe("US-5.3 — Edit or clear a due date", () => {
+    it("User sets a due date when editing a todo", async () => {
+      const { res: list } = await createList(userA.body.token);
+      const { res: created } = await createTodo(userA.body.token, list.body.id, { title: "Buy milk" });
+
+      const res = await request(app)
+        .put(`/todo/todos/${created.body.id}`)
+        .set(bearer(userA.body.token))
+        .send({ dueDate: "2026-07-20" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.dueDate).toBe("2026-07-20");
+    });
+
+    it("User clears a due date when editing a todo", async () => {
+      const { res: list } = await createList(userA.body.token);
+      const { res: created } = await createTodo(userA.body.token, list.body.id, {
+        title: "Buy milk",
+        dueDate: "2026-07-20",
+      });
+
+      const res = await request(app)
+        .put(`/todo/todos/${created.body.id}`)
+        .set(bearer(userA.body.token))
+        .send({ dueDate: null });
+
+      expect(res.status).toBe(200);
+      expect(res.body.dueDate).toBeNull();
+    });
+
+    it("API rejects an invalid due date on update", async () => {
+      const { res: list } = await createList(userA.body.token);
+      const { res: created } = await createTodo(userA.body.token, list.body.id, {
+        title: "Buy milk",
+        dueDate: "2026-07-15",
+      });
+
+      const res = await request(app)
+        .put(`/todo/todos/${created.body.id}`)
+        .set(bearer(userA.body.token))
+        .send({ dueDate: "2026-99-99" });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({
+        message: "Due date must be a valid date in YYYY-MM-DD format.",
+      });
+
+      const stored = await db.todo.findByPk(created.body.id);
+      expect(stored.dueDate).toBe("2026-07-15");
+    });
+
+    it("User cannot set due date on another user's todo", async () => {
+      const { res: listB } = await createList(userB.body.token);
+      const { res: todoB } = await createTodo(userB.body.token, listB.body.id, { title: "Hidden task" });
+
+      const res = await request(app)
+        .put(`/todo/todos/${todoB.body.id}`)
+        .set(bearer(userA.body.token))
+        .send({ dueDate: "2026-07-15" });
+
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ message: `Todo with id=${todoB.body.id} not found.` });
+
+      const stored = await db.todo.findByPk(todoB.body.id);
+      expect(stored.dueDate).toBeNull();
     });
   });
 });

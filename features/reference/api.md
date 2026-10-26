@@ -1,6 +1,6 @@
 # API Reference
 
-**Status:** Features 1–4.
+**Status:** Features 1–5.
 
 API mount path: `/todo` (see `backend/server.js`). Authenticated routes require `Authorization: Bearer <token>`.
 
@@ -77,7 +77,7 @@ Create request: `{ "name": "Groceries" }`. Client-supplied `userId` is ignored.
 
 ### Todo body (`POST .../todos` `201`, `PUT /todo/todos/:id` `200`)
 
-Create request: `{ "title": "Buy milk" }`. Client-supplied `userId` / `listId` is ignored.
+Create request: `{ "title": "Buy milk", "dueDate": "2026-07-15" }`. `dueDate` is optional (`YYYY-MM-DD` or `null`). Client-supplied `userId` / `listId` is ignored. On `PUT`, omit `dueDate` to leave it unchanged; send `null` to clear it.
 
 ```json
 {
@@ -85,6 +85,7 @@ Create request: `{ "title": "Buy milk" }`. Client-supplied `userId` / `listId` i
   "listId": 1,
   "title": "Buy milk",
   "completed": false,
+  "dueDate": "2026-07-15",
   "userId": 42,
   "createdAt": "2026-07-02T12:05:00.000Z",
   "updatedAt": "2026-07-02T12:05:00.000Z"
@@ -98,6 +99,7 @@ Create request: `{ "title": "Buy milk" }`. Client-supplied `userId` / `listId` i
 | Case | Status | Body |
 |------|--------|------|
 | Empty/whitespace title | `400` | `{ "message": "Todo title is required." }` |
+| Invalid `dueDate` | `400` | `{ "message": "Due date must be a valid date in YYYY-MM-DD format." }` |
 | Title longer than 255 characters | `400` | `{ "message": "Todo title must be 255 characters or fewer." }` |
 | Invalid `listId` / todo `id` | `400` | `{ "message": "List id is invalid." }` / `{ "message": "Todo id is invalid." }` |
 | Missing, unowned, or unknown list | `404` | `{ "message": "List with id=<id> not found." }` |

@@ -15,6 +15,10 @@ export default (sequelize, Sequelize) => {
       allowNull: false,
       defaultValue: false,
     },
+    dueDate: {
+      type: Sequelize.DATEONLY,
+      allowNull: true,
+    },
     userId: {
       type: Sequelize.INTEGER,
       allowNull: false,

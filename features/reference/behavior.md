@@ -49,6 +49,10 @@
 | New todos default **`completed: false`** | Todo create | Feature 3 |
 | Todos ordered **incomplete first**, then `createdAt` ascending | `findAll` order | Feature 3 |
 | Deleting a list **cascades** its todos | Sequelize `onDelete: CASCADE` | Feature 3 |
+| Optional todo **dueDate** is calendar-only (`YYYY-MM-DD` / `DATEONLY`); `null` means none | Todo create/update | Feature 5 |
+| `PUT` with `dueDate: null` clears; omitting `dueDate` leaves it unchanged | Todo update | Feature 5 |
+| Incomplete todos with `dueDate` before today (local calendar) use overdue styling | `isTodoOverdue` in Dashboard | Feature 5 |
+| Completed todos are never overdue-styled | `isTodoOverdue` | Feature 5 |
 
 ## Profile
 

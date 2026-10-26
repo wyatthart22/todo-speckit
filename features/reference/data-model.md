@@ -1,6 +1,6 @@
 # Data Model Reference
 
-**Status:** Features 1–4.
+**Status:** Features 1–5.
 
 ## Tables
 
@@ -46,6 +46,7 @@ Password is excluded from the Sequelize default scope. `fName`, `lName`, `email`
 | `listId` | INTEGER FK | Required; references `lists.id`; cascade on list delete |
 | `title` | STRING(255) | Required; trimmed; max 255 characters |
 | `completed` | BOOLEAN | Default `false` |
+| `dueDate` | DATEONLY | Nullable; optional on create/update; `YYYY-MM-DD` |
 | `userId` | INTEGER FK | Required; references `users.id`; set from `req.user.id` on create |
 | `createdAt` | DATE | Sequelize timestamps |
 | `updatedAt` | DATE | Sequelize timestamps |
